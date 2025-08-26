@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { CreditCard, Smartphone, Wallet, Building2 } from "lucide-react";
+import { CreditCard, Smartphone, Wallet, Building2, Shield, Clock, Award } from "lucide-react";
+import LazyImage from "@/components/LazyImage";
 import paymentMethodsImg from "@/assets/payment-methods.jpg";
 
 const PaymentMethods = () => {
@@ -95,9 +96,9 @@ const PaymentMethods = () => {
             className="relative"
           >
             <div className="relative overflow-hidden rounded-2xl shadow-2xl">
-              <img
+              <LazyImage
                 src={paymentMethodsImg}
-                alt="Payment Methods"
+                alt="Multiple payment methods including UPI, cards, wallets and net banking"
                 className="w-full h-auto object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20" />

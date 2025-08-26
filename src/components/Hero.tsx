@@ -1,18 +1,44 @@
 import { motion } from "framer-motion";
-import { MapPin, Calendar, Users } from "lucide-react";
+import { MapPin, Calendar, Users, Search, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import LazyImage from "@/components/LazyImage";
 import heroBus from "@/assets/hero-bus.jpg";
 
 const Hero = () => {
+  const [fromCity, setFromCity] = useState("");
+  const [toCity, setToCity] = useState("");
+  const [date, setDate] = useState<Date>();
+  const [passengers, setPassengers] = useState("1");
+
+  const popularCities = [
+    "Delhi", "Mumbai", "Bangalore", "Chennai", "Kolkata", "Hyderabad",
+    "Pune", "Ahmedabad", "Jaipur", "Lucknow", "Kanpur", "Nagpur",
+    "Indore", "Thane", "Bhopal", "Visakhapatnam", "Pimpri-Chinchwad", "Patna"
+  ];
+
+  const swapCities = () => {
+    const temp = fromCity;
+    setFromCity(toCity);
+    setToCity(temp);
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${heroBus})` }}
-      >
+      {/* Background Image with Lazy Loading */}
+      <div className="absolute inset-0">
+        <LazyImage 
+          src={heroBus}
+          alt="Modern bus for comfortable travel"
+          className="w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-hero opacity-80" />
       </div>
 
@@ -37,69 +63,134 @@ const Hero = () => {
             </p>
           </div>
 
-          {/* Search Form */}
+          {/* Enhanced Search Form */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <Card className="glass p-6 max-w-4xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card className="glass p-6 max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                {/* From City */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white">From</label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-white/70" />
-                    <Input 
-                      placeholder="Delhi" 
-                      className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/70"
-                    />
+                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-white/70 z-10" />
+                    <Select value={fromCity} onValueChange={setFromCity}>
+                      <SelectTrigger className="pl-10 bg-white/10 border-white/20 text-white">
+                        <SelectValue placeholder="Select departure city" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {popularCities.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
+
+                {/* Swap Button */}
+                <div className="flex justify-center md:justify-start">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={swapCities}
+                    className="h-10 w-10 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-full"
+                  >
+                    <ArrowUpDown className="h-4 w-4" />
+                  </Button>
+                </div>
                 
+                {/* To City */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white">To</label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-white/70" />
-                    <Input 
-                      placeholder="Mumbai" 
-                      className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/70"
-                    />
+                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-white/70 z-10" />
+                    <Select value={toCity} onValueChange={setToCity}>
+                      <SelectTrigger className="pl-10 bg-white/10 border-white/20 text-white">
+                        <SelectValue placeholder="Select destination" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {popularCities.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
+                {/* Journey Date with Calendar */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white">Journey Date</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-3 h-4 w-4 text-white/70" />
-                    <Input 
-                      type="date" 
-                      className="pl-10 bg-white/10 border-white/20 text-white"
-                    />
-                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal pl-10 bg-white/10 border-white/20 text-white hover:bg-white/20",
+                          !date && "text-white/70"
+                        )}
+                      >
+                        <Calendar className="absolute left-3 top-3 h-4 w-4 text-white/70" />
+                        {date ? format(date, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={date}
+                        onSelect={setDate}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                        className="pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
+                {/* Passengers */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white">Passengers</label>
                   <div className="relative">
-                    <Users className="absolute left-3 top-3 h-4 w-4 text-white/70" />
-                    <Input 
-                      placeholder="1" 
-                      className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/70"
-                    />
+                    <Users className="absolute left-3 top-3 h-4 w-4 text-white/70 z-10" />
+                    <Select value={passengers} onValueChange={setPassengers}>
+                      <SelectTrigger className="pl-10 bg-white/10 border-white/20 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[...Array(9)].map((_, i) => (
+                          <SelectItem key={i + 1} value={(i + 1).toString()}>
+                            {i + 1} {i === 0 ? "Passenger" : "Passengers"}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
               
               <motion.div 
                 className="mt-6 flex flex-col sm:flex-row gap-4 justify-center"
-                whileHover={{ scale: 1.02 }}
               >
-                <Button className="btn-hero text-lg px-12 py-3">
-                  Search Buses
-                </Button>
-                <Button variant="outline" className="btn-secondary">
-                  View Popular Routes
-                </Button>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button 
+                    className="btn-hero text-lg px-12 py-6 flex items-center space-x-3"
+                    disabled={!fromCity || !toCity || !date}
+                  >
+                    <Search className="h-5 w-5" />
+                    <span>Search Buses</span>
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button variant="outline" className="btn-secondary text-lg px-8 py-6">
+                    View Popular Routes
+                  </Button>
+                </motion.div>
               </motion.div>
             </Card>
           </motion.div>
